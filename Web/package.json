@@ -1,0 +1,22 @@
+{
+  "name": "web",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jquery": "^3.5.5",
+    "@types/knockout": "^3.4.69",
+    "firebase": "^8.2.10",
+    "gulp": "^4.0.2",
+    "gulp-if": "^3.0.0",
+    "gulp-watch": "^5.0.1"
+  },
+  "dependencies": {
+    "bootstrap-icons": "^1.4.0"
+  }
+}

@@ -1,0 +1,243 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Remove for Release -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <title>MB Task Tracker</title>
+
+    <!-- DEV:
+        <script src="Scripts/knockout-3.5.1.js"></script>
+
+        <script src="Scripts/jquery-3.5.1.min.js"></script>
+
+        <script src="node_modules/firebase/firebase-app.js"></script>
+        <script src="node_modules/firebase/firebase-auth.js"></script>
+        <script src="node_modules/firebase/firebase-database.js"></script>
+
+        <script src="app-code-js/a.js"></script>
+
+        <link href="app/app.css" rel="stylesheet" />
+
+        <link href="Content/bootstrap.min.css" rel="stylesheet" />
+        <link href="node_modules/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+    -->
+    <!-- PROD -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.5.0/knockout-min.js"></script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+
+    <script src="https://www.gstatic.com/firebasejs/8.3.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.3.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.3.0/firebase-database.js"></script>
+
+    <script src="a.js"></script>
+
+    <link href="app.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.0/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+
+</head>
+<body dir="ltr">
+
+    <div id="app-errored" style="display: none"></div>
+
+    <div id="app-loaded" class="container-md">
+
+        <div id="auth" class="auth-container" data-bind="template: { name: 'auth-template', data: vmApp().vmAuth }"></div>
+
+        <div id="status" data-bind="template: { name: 'status-template', data: vmApp().vmStatus }"></div>
+
+        <div id="content" class="main-content" data-bind="template: { name: activePage().view, data: activePage().model }"></div>
+
+    </div>
+
+    <script id="auth-template" type="text/html">
+
+        <div id="logged-in" class="mb-3" data-bind="visible: auth().authStatus() == 0">
+            <div class="row">
+                <div class="col">
+                    Welcome, <span data-bind="text: auth().nickname"></span>
+                </div>
+                <div class="col-md-3 text-md-right">
+                    <a href="#" class="ms-Link" data-bind="click: doLogout">Logout</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="not-logged-in" class="mb-3" data-bind="visible: auth().authStatus() == 1">
+            <div class="row">
+                <div class="col">
+                    You are not logged in.
+                </div>
+                <div class="col-md-3 text-md-right">
+                    <a href="#" class="ms-Link" data-bind="click: loginWithGoogle">Login with Google</a>
+                </div>
+            </div>
+        </div>
+
+    </script>
+
+    <script type="text/html" id="status-template">
+
+        <div id="alert-success" data-bind="visible: isSuccess()">
+            <div class="alert alert-success">
+                <div class="d-flex flex-row">
+                    <div class="pr-3 align-self-center">
+                        <i class="bi-emoji-smile"></i>
+                    </div>
+                    <div class="align-self-center">
+                        <span data-bind="text: statusMessageTruncated()"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="alert-error" data-bind="visible: isError()">
+            <div class="alert alert-danger">
+                <div class="d-flex flex-row">
+                    <div class="pr-3 align-self-start">
+                        <i class="bi-emoji-frown"></i>
+                    </div>
+                    <div class="align-self-start">
+                        <span data-bind="text: statusMessageTruncated()"></span>
+                        <a href="#" data-bind="click: toggleMoreInfo, visible: hasMoreInfo(), text: toggleMoreInfoText()"></a>
+                        <span data-bind="visible: toggledMoreInfo()"><br /></span>
+                        <span data-bind="text: status().statusMoreInfo(), visible: toggledMoreInfo()"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </script>
+
+    <script id="home-page-template" type="text/html">
+
+        <div class="mb-3" data-bind="visible: auth().authStatus() == 0">
+            <a class="btn btn-primary" href="#manage-tasks">Manage Tasks</a>
+        </div>
+        <div data-bind="visible: auth().hasStudents">
+            <p>View Students:</p>
+            <div data-bind="foreach: auth().students">
+                <a data-bind="attr : { href: '#manage-tasks?id=' + id }, text: name" ></a><br />
+            </div>
+        </div>
+
+    </script>
+
+    <script id="upload-tasks-template" type="text/html">
+
+        <div data-bind="visible: auth().authStatus() == 0">
+            <div class="mb-3">
+                <a href="#manage-tasks">Manage Tasks</a>
+            </div>
+            <div>
+                <a data-bind="attr: { href: jsonUrl, target: '_blank' }">Get JSON</a>
+            </div>
+            <div>
+                <textarea class="form-control" rows="10" data-bind="textInput: tasksToImport"></textarea>
+            </div>
+            <button type="button" class="btn btn-primary mb-3" data-bind="click: importTasks">Upload Tasks</button>
+        </div>
+
+    </script>
+
+    <script id="manage-tasks-template" type="text/html">
+
+        <div data-bind="visible: auth().authStatus() == 0">
+            <div>
+                <a href="#">
+                    <i class="bi-arrow-left"></i> Home
+                </a>
+            </div>
+            <div class="mb-3" data-bind="visible: tasks().studentName().length == 0">
+                <a href="#upload-tasks">Upload Tasks</a>
+            </div>
+            <div class="mb-3" data-bind="visible: tasks().studentName().length > 0">
+                <div class="row">
+                    <div class="col">
+                        <p>You are viewing tasks for <span data-bind="text: tasks().studentName"></span>:</p>
+                    </div>
+                    <div class="col text-md-right">
+                        <p>Tasks Last Uploaded: <span data-bind="text: tasks().lastUploadAt"></span></p>
+                    </div>
+                </div>
+                
+            </div>
+            <div data-bind="foreach: tasks().managedTasks">
+                <div class="card mb-3" data-bind="css: { 'border-danger': grouping() == 0, 'border-primary': grouping() == 1, 'border-success': grouping() == 2 }">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col align-self-center">
+                                <h5 class="card-title" data-bind="text: className"></h5>
+                                <h6 class="card-subtitle mb-2 text-muted" data-bind="text: title"></h6>
+                            </div>
+                            <div class="col-md-3 align-self-center text-center">
+                                <span data-bind="text: dtDisplay"></span><br />
+                                <span class="px-1" data-bind="style: { backgroundColor: bgColor }, text: category"></span>
+                            </div>
+                            <div class="col-md-auto align-self-center text-center">
+                                <a class="btn btn-primary" data-bind="visible: taskUrl().length > 0, attr: { href: taskUrl, target: '_blank' }"><i class="bi-link"></i></a>
+                            </div>
+                            <div class="col-md-auto align-self-center text-center">
+                                <a href="#" data-bind="click: $parent.setTaskPriority.bind($parent)"><i class="bi-star-fill" data-bind="style: { color: priority() ? 'red' : 'black' }"></i></a>
+                            </div>
+                            <div class="col-md-auto align-self-center text-center">
+                                <select class="form-select form-select-lg" data-bind="value: status, event: { change: $parent.setTaskStatus.bind($parent) }">
+                                    <option value="0">New</option>
+                                    <option value="1">Read</option>
+                                    <option value="2">Started</option>
+                                    <option value="3">Finished</option>
+                                    <option value="4">Submitted</option>
+                                    <option value="5">Nothing to Submit</option>
+                                    <option value="6">Failed to Submit</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-text" data-bind="html: description"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </script>
+
+    <script id="404-error-template" type="text/html">
+
+        <div>
+            <h2>404 Error: the requested page does not exist</h2>
+        </div>
+
+    </script>
+
+    <script id="pageRun" type="text/javascript">
+
+        $().ready(() => {
+            try {
+                var app = new gm.Shell.Application();
+                app.run();
+            } catch (e) {
+                console.log(e);
+                if (e instanceof Error) {
+                    $("#app-errored").show();
+                    $("#app-errored").text(e.message);
+                    $("#app-loaded").hide();
+                }
+            }
+        })
+
+    </script>
+
+
+</body>
+</html>
