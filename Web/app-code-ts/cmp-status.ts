@@ -1,7 +1,7 @@
 ﻿/// <reference path="../node_modules/@types/jquery/index.d.ts" />
 /// <reference path="../node_modules/@types/knockout/index.d.ts" />
 
-namespace gm.Components.Status {
+namespace pc.Components.Status {
 
     export enum StatusTypes {
         Clear,

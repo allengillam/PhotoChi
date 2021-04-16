@@ -2,7 +2,7 @@
 /// <reference path="../node_modules/@types/knockout/index.d.ts" />
 /// <reference path="../node_modules/firebase/index.d.ts" />
 
-namespace gm.Shell {
+namespace pc.Shell {
 
     export class Application {
 
@@ -19,13 +19,20 @@ namespace gm.Shell {
                     case "home-page":
                         this.shellViewModel.setActivePage({ title: "Home", view: "home-page-template", model: this.shellViewModel.vmApp().vmHome });
                         break;
-                    case "manage-tasks-page":
-                        this.shellViewModel.setActivePage({ title: "Manage Tasks", view: "manage-tasks-template", model: this.shellViewModel.vmApp().vmTasks });
-                        if (data["id"] != null) {
-                            this.shellViewModel.vmApp().vmTasks().tasks().initTasks(gm.Components.Tasks.TasksModel.INIT_TRIG_NAV, data["id"]);
-                        } else {
-                            this.shellViewModel.vmApp().vmTasks().tasks().initTasks(gm.Components.Tasks.TasksModel.INIT_TRIG_NAV);
-                        }
+                    case "albumizer-page":
+                        this.shellViewModel.setActivePage({ title: "Albumizer", view: "albumizer-template", model: this.shellViewModel.vmApp().vmAlbumizer });
+
+                        $.ajax({
+                            url: "https://photoslibrary.googleapis.com/v1/albums",
+                            headers: { 'Authorization': 'Bearer ' + this.shellViewModel.vmApp().vmAuth().auth().gapiToken },
+                            success: (result) => {
+                                console.log(result);
+                            },
+                            error: (error) => {
+                                console.log(error);
+                            }
+                        });
+
                         break;
                     default:
                         this.shellViewModel.setActivePage({ title: "404 Error", view: "404-error-template", model: null });
@@ -53,10 +60,10 @@ namespace gm.Shell {
             // Add URL Mappings:
             this.urlMapping = {};
             this.urlMapping["home-page"] = /^$/;
-            this.urlMapping["manage-tasks-page"] = /^manage-tasks$/;
+            this.urlMapping["albumizer-page"] = /^albumizer$/;
 
             // Initialize appState
-            let appModel = new gm.Components.App.AppModel();
+            let appModel = new pc.Components.App.AppModel();
 
             // Initialize main view model and router
             this.shellViewModel = new ShellViewModel(appModel);
@@ -80,16 +87,16 @@ namespace gm.Shell {
         router: KnockoutObservable<Router>;
         appLoaded: KnockoutObservable<boolean>
 
-        vmApp: KnockoutObservable<gm.Components.App.AppViewModel>;        
+        vmApp: KnockoutObservable<pc.Components.App.AppViewModel>;        
 
-        constructor(mAppModel: gm.Components.App.AppModel) {
+        constructor(mAppModel: pc.Components.App.AppModel) {
 
             this.appLoaded = ko.observable(false);
 
             this.activePage = ko.observable(null);
             this.router = ko.observable(null);
 
-            this.vmApp = ko.observable(new gm.Components.App.AppViewModel(mAppModel));
+            this.vmApp = ko.observable(new pc.Components.App.AppViewModel(mAppModel));
 
             this.appLoaded(true);
 

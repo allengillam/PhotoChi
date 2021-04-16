@@ -2,7 +2,7 @@
 /// <reference path="../node_modules/@types/knockout/index.d.ts" />
 /// <reference path="../node_modules/firebase/index.d.ts" />
 
-namespace gm.Components.Home {
+namespace pc.Components.Home {
 
     export class HomePageViewModel {
 

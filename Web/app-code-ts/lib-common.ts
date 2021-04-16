@@ -1,4 +1,4 @@
-﻿namespace gm.Common {
+﻿namespace pc.Common {
 
     export class DateHelpers {
 

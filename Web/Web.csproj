@@ -292,11 +292,11 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="app-code-ts\app-shell.ts" />
+    <TypeScriptCompile Include="app-code-ts\cmp-albumizer.ts" />
     <TypeScriptCompile Include="app-code-ts\cmp-app.ts" />
     <TypeScriptCompile Include="app-code-ts\cmp-auth.ts" />
     <TypeScriptCompile Include="app-code-ts\cmp-home.ts" />
     <TypeScriptCompile Include="app-code-ts\cmp-status.ts" />
-    <TypeScriptCompile Include="app-code-ts\cmp-tasks.ts" />
     <TypeScriptCompile Include="app-code-ts\lib-common.ts" />
     <TypeScriptCompile Include="Scripts\index.d.ts" />
   </ItemGroup>

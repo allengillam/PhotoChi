@@ -122,12 +122,13 @@
     <script id="home-page-template" type="text/html">
 
         <div class="mb-3" data-bind="visible: auth().authStatus() == 0">
-            <a class="btn btn-primary" href="#manage-tasks">Manage Tasks</a>
+            <a class="btn btn-primary" href="#albumizer">Albumizer</a><br />
+            <span>The albumizer allows you to easily put photos into one or more albums. It begins by analyzing your photo albums.</span>
         </div>
 
     </script>
 
-    <script id="manage-tasks-template" type="text/html">
+    <script id="albumizer-template" type="text/html">
 
         <div data-bind="visible: auth().authStatus() == 0">
             <div>
@@ -135,56 +136,8 @@
                     <i class="bi-arrow-left"></i> Home
                 </a>
             </div>
-            <div class="mb-3" data-bind="visible: tasks().studentName().length == 0">
-                <a href="#upload-tasks">Upload Tasks</a>
-            </div>
-            <div class="mb-3" data-bind="visible: tasks().studentName().length > 0">
-                <div class="row">
-                    <div class="col">
-                        <p>You are viewing tasks for <span data-bind="text: tasks().studentName"></span>:</p>
-                    </div>
-                    <div class="col text-md-right">
-                        <p>Tasks Last Uploaded: <span data-bind="text: tasks().lastUploadAt"></span></p>
-                    </div>
-                </div>
-                
-            </div>
-            <div data-bind="foreach: tasks().managedTasks">
-                <div class="card mb-3" data-bind="css: { 'border-danger': grouping() == 0, 'border-primary': grouping() == 1, 'border-success': grouping() == 2 }">
-                    <div class="card-header">
-                        <div class="row">
-                            <div class="col align-self-center">
-                                <h5 class="card-title" data-bind="text: className"></h5>
-                                <h6 class="card-subtitle mb-2 text-muted" data-bind="text: title"></h6>
-                            </div>
-                            <div class="col-md-3 align-self-center text-center">
-                                <span data-bind="text: dtDisplay"></span><br />
-                                <span class="px-1" data-bind="style: { backgroundColor: bgColor }, text: category"></span>
-                            </div>
-                            <div class="col-md-auto align-self-center text-center">
-                                <a class="btn btn-primary" data-bind="visible: taskUrl().length > 0, attr: { href: taskUrl, target: '_blank' }"><i class="bi-link"></i></a>
-                            </div>
-                            <div class="col-md-auto align-self-center text-center">
-                                <a href="#" data-bind="click: $parent.setTaskPriority.bind($parent)"><i class="bi-star-fill" data-bind="style: { color: priority() ? 'red' : 'black' }"></i></a>
-                            </div>
-                            <div class="col-md-auto align-self-center text-center">
-                                <select class="form-select form-select-lg" data-bind="value: status, event: { change: $parent.setTaskStatus.bind($parent) }">
-                                    <option value="0">New</option>
-                                    <option value="1">Read</option>
-                                    <option value="2">Started</option>
-                                    <option value="3">Finished</option>
-                                    <option value="4">Submitted</option>
-                                    <option value="5">Nothing to Submit</option>
-                                    <option value="6">Failed to Submit</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div class="card-text" data-bind="html: description"></div>
-                    </div>
-                </div>
-            </div>
+
+            
         </div>
 
     </script>
@@ -201,7 +154,7 @@
 
         $().ready(() => {
             try {
-                var app = new gm.Shell.Application();
+                var app = new pc.Shell.Application();
                 app.run();
             } catch (e) {
                 console.log(e);

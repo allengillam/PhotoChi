@@ -1,7 +1,7 @@
 ﻿/// <reference path="../node_modules/@types/jquery/index.d.ts" />
 /// <reference path="../node_modules/@types/knockout/index.d.ts" />
 
-namespace gm.Components.Auth {
+namespace pc.Components.Auth {
 
     export enum AuthStatuses {
         LoggedIn = 0,

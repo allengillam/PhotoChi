@@ -1,19 +1,19 @@
 ﻿/// <reference path="../node_modules/@types/jquery/index.d.ts" />
 /// <reference path="../node_modules/@types/knockout/index.d.ts" />
 
-namespace gm.Components.App {
+namespace pc.Components.App {
 
     export class AppModel {
 
-        status: KnockoutObservable<gm.Components.Status.StatusModel>;
-        auth: KnockoutObservable<gm.Components.Auth.AuthModel>;
-        tasks: KnockoutObservable<gm.Components.Tasks.TasksModel>;
+        status: KnockoutObservable<pc.Components.Status.StatusModel>;
+        auth: KnockoutObservable<pc.Components.Auth.AuthModel>;
+        albumizer: KnockoutObservable<pc.Components.Albumizer.AlbumizerModel>;
 
         constructor() {
 
-            this.status = ko.observable(new gm.Components.Status.StatusModel());
-            this.auth = ko.observable(new gm.Components.Auth.AuthModel(this.status));
-            this.tasks = ko.observable(new gm.Components.Tasks.TasksModel(this.auth, this.status));
+            this.status = ko.observable(new pc.Components.Status.StatusModel());
+            this.auth = ko.observable(new pc.Components.Auth.AuthModel(this.status));
+            this.albumizer = ko.observable(new pc.Components.Albumizer.AlbumizerModel(this.auth, this.status));
 
             this.auth().authStatus.subscribe((newValue) => {
                 this.authStatusChanged(newValue);
@@ -21,11 +21,11 @@ namespace gm.Components.App {
 
         }
 
-        authStatusChanged(authStatus: gm.Components.Auth.AuthStatuses) {
+        authStatusChanged(authStatus: pc.Components.Auth.AuthStatuses) {
             try {
-                if (authStatus == gm.Components.Auth.AuthStatuses.LoggedOut) {
+                if (authStatus == pc.Components.Auth.AuthStatuses.LoggedOut) {
                     location.href = "#";
-                } else if (authStatus == gm.Components.Auth.AuthStatuses.LoggedIn) {
+                } else if (authStatus == pc.Components.Auth.AuthStatuses.LoggedIn) {
                 }
             } catch (e) {
                 this.status().setErrorStatus(e, "An error occurred in AppModel's authStatusChanged.");
@@ -36,17 +36,17 @@ namespace gm.Components.App {
 
     export class AppViewModel {
 
-        vmStatus: KnockoutObservable<gm.Components.Status.StatusViewModel>;
-        vmAuth: KnockoutObservable<gm.Components.Auth.AuthViewModel>;
-        vmHome: KnockoutObservable<gm.Components.Home.HomePageViewModel>;
-        vmTasks: KnockoutObservable<gm.Components.Tasks.TasksViewModel>;
+        vmStatus: KnockoutObservable<pc.Components.Status.StatusViewModel>;
+        vmAuth: KnockoutObservable<pc.Components.Auth.AuthViewModel>;
+        vmHome: KnockoutObservable<pc.Components.Home.HomePageViewModel>;
+        vmAlbumizer: KnockoutObservable<pc.Components.Albumizer.AlbumizerViewModel>;
 
-        constructor(mAppModel: gm.Components.App.AppModel) {
+        constructor(mAppModel: pc.Components.App.AppModel) {
 
-            this.vmStatus = ko.observable(new gm.Components.Status.StatusViewModel(mAppModel));
-            this.vmAuth = ko.observable(new gm.Components.Auth.AuthViewModel(mAppModel));
-            this.vmHome = ko.observable(new gm.Components.Home.HomePageViewModel(mAppModel));
-            this.vmTasks = ko.observable(new gm.Components.Tasks.TasksViewModel(mAppModel));
+            this.vmStatus = ko.observable(new pc.Components.Status.StatusViewModel(mAppModel));
+            this.vmAuth = ko.observable(new pc.Components.Auth.AuthViewModel(mAppModel));
+            this.vmHome = ko.observable(new pc.Components.Home.HomePageViewModel(mAppModel));
+            this.vmAlbumizer = ko.observable(new pc.Components.Albumizer.AlbumizerViewModel(mAppModel));
           
         }
 
