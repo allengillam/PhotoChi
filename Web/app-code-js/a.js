@@ -15,9 +15,6 @@ var gm;
                         case "home-page":
                             this.shellViewModel.setActivePage({ title: "Home", view: "home-page-template", model: this.shellViewModel.vmApp().vmHome });
                             break;
-                        case "upload-tasks-page":
-                            this.shellViewModel.setActivePage({ title: "Upload Tasks", view: "upload-tasks-template", model: this.shellViewModel.vmApp().vmTasks });
-                            break;
                         case "manage-tasks-page":
                             this.shellViewModel.setActivePage({ title: "Manage Tasks", view: "manage-tasks-template", model: this.shellViewModel.vmApp().vmTasks });
                             if (data["id"] != null) {
@@ -40,19 +37,18 @@ var gm;
             }
             run() {
                 var firebaseConfig = {
-                    apiKey: "AIzaSyClCU4YWUVSk2TDs7tfMmYpCnL_leI6474",
-                    authDomain: "golfmike-aca0e.firebaseapp.com",
-                    databaseURL: "https://golfmike-aca0e-default-rtdb.firebaseio.com",
-                    projectId: "golfmike-aca0e",
-                    storageBucket: "golfmike-aca0e.appspot.com",
-                    messagingSenderId: "1086790533593",
-                    appId: "1:1086790533593:web:4841a91f89efacb57299c8"
+                    apiKey: "AIzaSyAgsAfe-2t5aTv0o6q9TSIR8x-B9qAiFJs",
+                    authDomain: "photochi.firebaseapp.com",
+                    databaseUrl: "https://photochi-default-rtdb.firebaseio.com",
+                    projectId: "photochi",
+                    storageBucket: "photochi.appspot.com",
+                    messagingSenderId: "793178649724",
+                    appId: "1:793178649724:web:36e84b2e7e6ba0c37e45f9"
                 };
                 firebase.default.initializeApp(firebaseConfig);
                 // Add URL Mappings:
                 this.urlMapping = {};
                 this.urlMapping["home-page"] = /^$/;
-                this.urlMapping["upload-tasks-page"] = /^upload-tasks$/;
                 this.urlMapping["manage-tasks-page"] = /^manage-tasks$/;
                 // Initialize appState
                 let appModel = new gm.Components.App.AppModel();
@@ -137,11 +133,9 @@ var gm;
                 authStatusChanged(authStatus) {
                     try {
                         if (authStatus == gm.Components.Auth.AuthStatuses.LoggedOut) {
-                            this.tasks().initTasks(Components.Tasks.TasksModel.INIT_TRIG_LOGOUT);
                             location.href = "#";
                         }
                         else if (authStatus == gm.Components.Auth.AuthStatuses.LoggedIn) {
-                            this.tasks().initTasks(Components.Tasks.TasksModel.INIT_TRIG_LOGIN);
                         }
                     }
                     catch (e) {
@@ -192,12 +186,8 @@ var gm;
                     this._userId = ko.observable("");
                     this._name = ko.observable("");
                     this._emailAddress = ko.observable("");
-                    this.nickname = ko.observable("");
+                    this.gapiToken = "";
                     this.authStatus = ko.observable(AuthStatuses.LoggedOut);
-                    this.students = ko.observableArray();
-                    this.hasStudents = ko.pureComputed(() => {
-                        return this.students().length > 0;
-                    }, this);
                     this.userId = ko.pureComputed(() => {
                         return this._userId();
                     }, this);
@@ -217,27 +207,16 @@ var gm;
                             this._userId(user.uid);
                             this._name(user.displayName);
                             this._emailAddress(user.email);
-                            firebase.default.database().ref("/users/" + user.uid + "/profile").get().then((snapshot) => {
-                                var _a;
-                                let data = snapshot.val();
-                                this.nickname((_a = data.nickname) !== null && _a !== void 0 ? _a : user.displayName);
-                                if (data.students != null) {
-                                    Object.keys(data.students).forEach((key) => {
-                                        this.students.push(new Student(key, data.students[key]));
-                                    });
-                                    this.students.sort((l, r) => {
-                                        return l.name < r.name ? -1 : l.name > r.name ? 1 : 0;
-                                    });
-                                }
-                                this.authStatus(AuthStatuses.LoggedIn);
-                            });
+                            this.authStatus(AuthStatuses.LoggedIn);
+                            //firebase.default.database().ref("/users/" + user.uid + "/profile").get().then((snapshot) => {
+                            //    let data = snapshot.val();             
+                            //});
                         }
                         else {
                             this._userId("");
                             this._name("");
                             this._emailAddress("");
-                            this.nickname("");
-                            this.students.removeAll();
+                            this.gapiToken = "";
                             this.authStatus(AuthStatuses.LoggedOut);
                         }
                     }
@@ -248,8 +227,13 @@ var gm;
                 loginWithGoogle() {
                     // Login the user
                     let provider = new firebase.default.auth.GoogleAuthProvider();
-                    firebase.default.auth().languageCode = 'it';
-                    firebase.default.auth().signInWithPopup(provider);
+                    provider.addScope("https://www.googleapis.com/auth/photoslibrary");
+                    firebase.default.auth().signInWithPopup(provider).then((result) => {
+                        let cred = result.credential;
+                        this.gapiToken = cred.accessToken;
+                    }).catch((error) => {
+                        console.log(error);
+                    });
                 }
                 doLogout() {
                     firebase.default.auth().signOut();
@@ -647,9 +631,6 @@ var gm;
                     if (reInit) {
                         // Clear the existing data
                         this.managedTasks.removeAll();
-                        if (this.studentId != this.auth().userId()) {
-                            this.studentName(this.auth().students().find(student => student.id == this.studentId).name);
-                        }
                         this.classes = {};
                         this.taskItemsObj = {};
                         this.taskDataObj = {};

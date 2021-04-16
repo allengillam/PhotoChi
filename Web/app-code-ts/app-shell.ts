@@ -19,9 +19,6 @@ namespace gm.Shell {
                     case "home-page":
                         this.shellViewModel.setActivePage({ title: "Home", view: "home-page-template", model: this.shellViewModel.vmApp().vmHome });
                         break;
-                    case "upload-tasks-page":
-                        this.shellViewModel.setActivePage({ title: "Upload Tasks", view: "upload-tasks-template", model: this.shellViewModel.vmApp().vmTasks });
-                        break;
                     case "manage-tasks-page":
                         this.shellViewModel.setActivePage({ title: "Manage Tasks", view: "manage-tasks-template", model: this.shellViewModel.vmApp().vmTasks });
                         if (data["id"] != null) {
@@ -43,20 +40,19 @@ namespace gm.Shell {
         run() {
 
             var firebaseConfig = {
-                apiKey: "AIzaSyClCU4YWUVSk2TDs7tfMmYpCnL_leI6474",
-                authDomain: "golfmike-aca0e.firebaseapp.com",
-                databaseURL: "https://golfmike-aca0e-default-rtdb.firebaseio.com",
-                projectId: "golfmike-aca0e",
-                storageBucket: "golfmike-aca0e.appspot.com",
-                messagingSenderId: "1086790533593",
-                appId: "1:1086790533593:web:4841a91f89efacb57299c8"
+                apiKey: "AIzaSyAgsAfe-2t5aTv0o6q9TSIR8x-B9qAiFJs",
+                authDomain: "photochi.firebaseapp.com",
+                databaseUrl: "https://photochi-default-rtdb.firebaseio.com",
+                projectId: "photochi",
+                storageBucket: "photochi.appspot.com",
+                messagingSenderId: "793178649724",
+                appId: "1:793178649724:web:36e84b2e7e6ba0c37e45f9"
             };
             firebase.default.initializeApp(firebaseConfig);
 
             // Add URL Mappings:
             this.urlMapping = {};
             this.urlMapping["home-page"] = /^$/;
-            this.urlMapping["upload-tasks-page"] = /^upload-tasks$/;
             this.urlMapping["manage-tasks-page"] = /^manage-tasks$/;
 
             // Initialize appState

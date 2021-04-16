@@ -9,7 +9,7 @@
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
 
-    <title>MB Task Tracker</title>
+    <title>Photo Chi</title>
 
     <!-- DEV:    -->
     <script src="Scripts/knockout-3.5.1.js"></script>
@@ -65,7 +65,7 @@
         <div id="logged-in" class="mb-3" data-bind="visible: auth().authStatus() == 0">
             <div class="row">
                 <div class="col">
-                    Welcome, <span data-bind="text: auth().nickname"></span>
+                    Welcome, <span data-bind="text: auth().name"></span>
                 </div>
                 <div class="col-md-3 text-md-right">
                     <a href="#" class="ms-Link" data-bind="click: doLogout">Logout</a>
@@ -123,29 +123,6 @@
 
         <div class="mb-3" data-bind="visible: auth().authStatus() == 0">
             <a class="btn btn-primary" href="#manage-tasks">Manage Tasks</a>
-        </div>
-        <div data-bind="visible: auth().hasStudents">
-            <p>View Students:</p>
-            <div data-bind="foreach: auth().students">
-                <a data-bind="attr : { href: '#manage-tasks?id=' + id }, text: name" ></a><br />
-            </div>
-        </div>
-
-    </script>
-
-    <script id="upload-tasks-template" type="text/html">
-
-        <div data-bind="visible: auth().authStatus() == 0">
-            <div class="mb-3">
-                <a href="#manage-tasks">Manage Tasks</a>
-            </div>
-            <div>
-                <a data-bind="attr: { href: jsonUrl, target: '_blank' }">Get JSON</a>
-            </div>
-            <div>
-                <textarea class="form-control" rows="10" data-bind="textInput: tasksToImport"></textarea>
-            </div>
-            <button type="button" class="btn btn-primary mb-3" data-bind="click: importTasks">Upload Tasks</button>
         </div>
 
     </script>

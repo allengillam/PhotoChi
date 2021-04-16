@@ -226,9 +226,7 @@ namespace gm.Components.Tasks {
             if (reInit) {
                 // Clear the existing data
                 this.managedTasks.removeAll();
-                if (this.studentId != this.auth().userId()) {
-                    this.studentName(this.auth().students().find(student => student.id == this.studentId).name);
-                }
+
                 this.classes = {};
                 this.taskItemsObj = {};
                 this.taskDataObj = {};

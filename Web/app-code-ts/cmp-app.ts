@@ -24,10 +24,8 @@ namespace gm.Components.App {
         authStatusChanged(authStatus: gm.Components.Auth.AuthStatuses) {
             try {
                 if (authStatus == gm.Components.Auth.AuthStatuses.LoggedOut) {
-                    this.tasks().initTasks(Tasks.TasksModel.INIT_TRIG_LOGOUT);
                     location.href = "#";
                 } else if (authStatus == gm.Components.Auth.AuthStatuses.LoggedIn) {
-                    this.tasks().initTasks(Tasks.TasksModel.INIT_TRIG_LOGIN);
                 }
             } catch (e) {
                 this.status().setErrorStatus(e, "An error occurred in AppModel's authStatusChanged.");

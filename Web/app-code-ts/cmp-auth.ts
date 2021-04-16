@@ -22,9 +22,7 @@ namespace gm.Components.Auth {
         name: KnockoutComputed<string>;
         emailAddress: KnockoutComputed<string>;
 
-        nickname: KnockoutObservable<string>;
-        students: KnockoutObservableArray<Student>;
-        hasStudents: KnockoutComputed<boolean>;
+        gapiToken: string;
 
         authStatus: KnockoutObservable<number>;
 
@@ -35,14 +33,8 @@ namespace gm.Components.Auth {
             this._userId = ko.observable("");
             this._name = ko.observable("");
             this._emailAddress = ko.observable("");
-            this.nickname = ko.observable("");
+            this.gapiToken = "";
             this.authStatus = ko.observable(AuthStatuses.LoggedOut);
-
-            this.students = ko.observableArray();
-
-            this.hasStudents = ko.pureComputed(() => {
-                return this.students().length > 0;
-            }, this);
 
             this.userId = ko.pureComputed(() => {
                 return this._userId();
@@ -66,25 +58,19 @@ namespace gm.Components.Auth {
                     this._userId(user.uid);
                     this._name(user.displayName);
                     this._emailAddress(user.email);
-                    firebase.default.database().ref("/users/" + user.uid + "/profile").get().then((snapshot) => {
-                        let data = snapshot.val();
-                        this.nickname(data.nickname ?? user.displayName);
-                        if (data.students != null) {
-                            Object.keys(data.students).forEach((key) => {
-                                this.students.push(new Student(key, data.students[key]));
-                            });
-                            this.students.sort((l, r) => {
-                                return l.name < r.name ? -1 : l.name > r.name ? 1 : 0;
-                            });
-                        }                      
-                        this.authStatus(AuthStatuses.LoggedIn);
-                    });
+
+                    this.authStatus(AuthStatuses.LoggedIn);
+
+
+                    //firebase.default.database().ref("/users/" + user.uid + "/profile").get().then((snapshot) => {
+                    //    let data = snapshot.val();             
+                    //});
+
                 } else {
                     this._userId("");
                     this._name("");
                     this._emailAddress("");
-                    this.nickname("");
-                    this.students.removeAll();
+                    this.gapiToken = "";
                     this.authStatus(AuthStatuses.LoggedOut);
                 }
             } catch (e) {
@@ -95,8 +81,13 @@ namespace gm.Components.Auth {
         loginWithGoogle() {
             // Login the user
             let provider = new firebase.default.auth.GoogleAuthProvider();
-            firebase.default.auth().languageCode = 'it';
-            firebase.default.auth().signInWithPopup(provider)
+            provider.addScope("https://www.googleapis.com/auth/photoslibrary");
+            firebase.default.auth().signInWithPopup(provider).then((result) => {
+                let cred: firebase.default.auth.OAuthCredential = result.credential;
+                this.gapiToken = cred.accessToken;
+            }).catch((error) => {
+                console.log(error);
+            });
         }
 
         doLogout() {
