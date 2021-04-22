@@ -46,9 +46,9 @@ namespace pc.Components.Auth {
                 return this._emailAddress();
             }, this);
 
-            firebase.default.auth().onAuthStateChanged((user) => {
-                this.authStateChanged(user);
-            });
+            //firebase.default.auth().onAuthStateChanged((user) => {
+            //    //this.authStateChanged(user);
+            //});
 
         }
 
@@ -60,7 +60,6 @@ namespace pc.Components.Auth {
                     this._emailAddress(user.email);
 
                     this.authStatus(AuthStatuses.LoggedIn);
-
 
                     //firebase.default.database().ref("/users/" + user.uid + "/profile").get().then((snapshot) => {
                     //    let data = snapshot.val();             
@@ -85,6 +84,11 @@ namespace pc.Components.Auth {
             firebase.default.auth().signInWithPopup(provider).then((result) => {
                 let cred: firebase.default.auth.OAuthCredential = result.credential;
                 this.gapiToken = cred.accessToken;
+                this._userId(result.user.uid);
+                this._name(result.user.displayName);
+                this._emailAddress(result.user.email);
+
+                this.authStatus(AuthStatuses.LoggedIn);
             }).catch((error) => {
                 console.log(error);
             });
@@ -92,6 +96,11 @@ namespace pc.Components.Auth {
 
         doLogout() {
             firebase.default.auth().signOut();
+            this._userId("");
+            this._name("");
+            this._emailAddress("");
+            this.gapiToken = "";
+            this.authStatus(AuthStatuses.LoggedOut);
         }        
 
     }

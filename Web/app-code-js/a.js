@@ -17,16 +17,7 @@ var pc;
                             break;
                         case "albumizer-page":
                             this.shellViewModel.setActivePage({ title: "Albumizer", view: "albumizer-template", model: this.shellViewModel.vmApp().vmAlbumizer });
-                            $.ajax({
-                                url: "https://photoslibrary.googleapis.com/v1/albums",
-                                headers: { 'Authorization': 'Bearer ' + this.shellViewModel.vmApp().vmAuth().auth().gapiToken },
-                                success: (result) => {
-                                    console.log(result);
-                                },
-                                error: (error) => {
-                                    console.log(error);
-                                }
-                            });
+                            this.shellViewModel.vmApp().vmAlbumizer().onNavigate();
                             break;
                         default:
                             this.shellViewModel.setActivePage({ title: "404 Error", view: "404-error-template", model: null });
@@ -119,6 +110,100 @@ var pc;
 })(pc || (pc = {}));
 /// <reference path="../node_modules/@types/jquery/index.d.ts" />
 /// <reference path="../node_modules/@types/knockout/index.d.ts" />
+/// <reference path="../node_modules/firebase/index.d.ts" />
+var pc;
+(function (pc) {
+    var Components;
+    (function (Components) {
+        var Albumizer;
+        (function (Albumizer) {
+            class AlbumizerModel {
+                constructor(mAuth, mStatus) {
+                    this.auth = mAuth;
+                    this.status = mStatus;
+                    this.albumsLoaded = false;
+                    this.photosLoaded = false;
+                }
+                loadAlbums() {
+                    this.getAlbumsPage(10, "");
+                    this.albumsLoaded = true;
+                }
+                loadPhotos() {
+                    this.getPhotosPage(10, "");
+                    this.photosLoaded = true;
+                }
+                getAlbumsPage(pageSize, nextPageToken) {
+                    let requestData = { pageSize: pageSize };
+                    if (nextPageToken.length > 0) {
+                        requestData['pageToken'] = nextPageToken;
+                    }
+                    $.ajax({
+                        url: "https://photoslibrary.googleapis.com/v1/albums",
+                        headers: { 'Authorization': 'Bearer ' + this.auth().gapiToken },
+                        data: requestData,
+                        success: (result) => {
+                            console.log(result);
+                            if (result.albums) {
+                                if (result.nextPageToken) {
+                                    this.albumsNextPageToken = result.nextPageToken;
+                                    this.getAlbumsPage(10, this.albumsNextPageToken);
+                                }
+                            }
+                        },
+                        error: (error) => {
+                            console.log(error);
+                        }
+                    });
+                }
+                getPhotosPage(pageSize, nextPageToken) {
+                    let requestData = { pageSize: pageSize };
+                    if (nextPageToken.length > 0) {
+                        requestData['pageToken'] = nextPageToken;
+                    }
+                    $.ajax({
+                        url: "https://photoslibrary.googleapis.com/v1/mediaItems",
+                        headers: {
+                            'Content-type': 'application/json',
+                            'Authorization': 'Bearer ' + this.auth().gapiToken
+                        },
+                        data: requestData,
+                        success: (result) => {
+                            console.log(result);
+                            if (result.mediaItems) {
+                                if (result.nextPageToken) {
+                                    this.photosNextPageToken = result.nextPageToken;
+                                    this.getPhotosPage(10, this.photosNextPageToken);
+                                }
+                            }
+                        },
+                        error: (error) => {
+                            console.log(error);
+                        }
+                    });
+                }
+            }
+            Albumizer.AlbumizerModel = AlbumizerModel;
+            class AlbumizerViewModel {
+                constructor(mAppModel) {
+                    this.auth = mAppModel.auth;
+                    this.status = mAppModel.status;
+                    this.albumizer = mAppModel.albumizer;
+                }
+                onNavigate() {
+                    if (!this.albumizer().albumsLoaded) {
+                        this.albumizer().loadAlbums();
+                    }
+                    if (!this.albumizer().photosLoaded) {
+                        this.albumizer().loadPhotos();
+                    }
+                }
+            }
+            Albumizer.AlbumizerViewModel = AlbumizerViewModel;
+        })(Albumizer = Components.Albumizer || (Components.Albumizer = {}));
+    })(Components = pc.Components || (pc.Components = {}));
+})(pc || (pc = {}));
+/// <reference path="../node_modules/@types/jquery/index.d.ts" />
+/// <reference path="../node_modules/@types/knockout/index.d.ts" />
 var pc;
 (function (pc) {
     var Components;
@@ -201,9 +286,9 @@ var pc;
                     this.emailAddress = ko.pureComputed(() => {
                         return this._emailAddress();
                     }, this);
-                    firebase.default.auth().onAuthStateChanged((user) => {
-                        this.authStateChanged(user);
-                    });
+                    //firebase.default.auth().onAuthStateChanged((user) => {
+                    //    //this.authStateChanged(user);
+                    //});
                 }
                 authStateChanged(user) {
                     try {
@@ -235,12 +320,21 @@ var pc;
                     firebase.default.auth().signInWithPopup(provider).then((result) => {
                         let cred = result.credential;
                         this.gapiToken = cred.accessToken;
+                        this._userId(result.user.uid);
+                        this._name(result.user.displayName);
+                        this._emailAddress(result.user.email);
+                        this.authStatus(AuthStatuses.LoggedIn);
                     }).catch((error) => {
                         console.log(error);
                     });
                 }
                 doLogout() {
                     firebase.default.auth().signOut();
+                    this._userId("");
+                    this._name("");
+                    this._emailAddress("");
+                    this.gapiToken = "";
+                    this.authStatus(AuthStatuses.LoggedOut);
                 }
             }
             Auth.AuthModel = AuthModel;
@@ -500,31 +594,5 @@ var pc;
         }
         Common.DateHelpers = DateHelpers;
     })(Common = pc.Common || (pc.Common = {}));
-})(pc || (pc = {}));
-/// <reference path="../node_modules/@types/jquery/index.d.ts" />
-/// <reference path="../node_modules/@types/knockout/index.d.ts" />
-/// <reference path="../node_modules/firebase/index.d.ts" />
-var pc;
-(function (pc) {
-    var Components;
-    (function (Components) {
-        var Albumizer;
-        (function (Albumizer) {
-            class AlbumizerModel {
-                constructor(mAuth, mStatus) {
-                    this.auth = mAuth;
-                    this.status = mStatus;
-                }
-            }
-            Albumizer.AlbumizerModel = AlbumizerModel;
-            class AlbumizerViewModel {
-                constructor(mAppModel) {
-                    this.auth = mAppModel.auth;
-                    this.status = mAppModel.status;
-                }
-            }
-            Albumizer.AlbumizerViewModel = AlbumizerViewModel;
-        })(Albumizer = Components.Albumizer || (Components.Albumizer = {}));
-    })(Components = pc.Components || (pc.Components = {}));
 })(pc || (pc = {}));
 //# sourceMappingURL=a.js.map

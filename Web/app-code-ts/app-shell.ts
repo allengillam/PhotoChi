@@ -21,18 +21,7 @@ namespace pc.Shell {
                         break;
                     case "albumizer-page":
                         this.shellViewModel.setActivePage({ title: "Albumizer", view: "albumizer-template", model: this.shellViewModel.vmApp().vmAlbumizer });
-
-                        $.ajax({
-                            url: "https://photoslibrary.googleapis.com/v1/albums",
-                            headers: { 'Authorization': 'Bearer ' + this.shellViewModel.vmApp().vmAuth().auth().gapiToken },
-                            success: (result) => {
-                                console.log(result);
-                            },
-                            error: (error) => {
-                                console.log(error);
-                            }
-                        });
-
+                        this.shellViewModel.vmApp().vmAlbumizer().onNavigate();
                         break;
                     default:
                         this.shellViewModel.setActivePage({ title: "404 Error", view: "404-error-template", model: null });
